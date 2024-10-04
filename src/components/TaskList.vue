@@ -14,6 +14,7 @@
           {{ task.name }}
         </el-checkbox>
         <el-button type="danger" @click="removeTask(index)"> 删除 </el-button>
+        <el-button @click="speekTask(index)">播放</el-button>
       </li>
     </ul>
   </div>
@@ -26,7 +27,11 @@ export default {
   data() {
     return {
       filter: 'all',
-      filteredTasks: []
+      filteredTasks: [],
+      speech: {
+        allVoices: [],
+        synth: window.speechSynthesis
+      }
     }
   },
   computed: {
@@ -34,6 +39,11 @@ export default {
   },
   mounted() {
     this.filteredTasks = this.allTasks
+  },
+
+  created() {
+    this.speech.allVoices = this.speech.synth.getVoices()
+    console.log('this.speech==', this.speech)
   },
 
   methods: {
@@ -49,6 +59,19 @@ export default {
     },
     updateTaskStatus(task) {
       // 这里可以添加逻辑来更新任务状态
+    },
+    speekTask(index) {
+      if (typeof SpeechSynthesisUtterance !== 'undefined') {
+        if (this.speech.allVoices.length > 0) {
+          const voiceUtt = new SpeechSynthesisUtterance(this.allTasks[index].name)
+          voiceUtt.voice = this.speech.allVoices.filter(
+            item => item.lang === 'zh-CN' && item.name.includes('(Natural)')
+          )[0]
+          this.speech.synth.speak(voiceUtt)
+        } else {
+          console.log('this.speech:', this.speech)
+        }
+      }
     }
   }
 }
